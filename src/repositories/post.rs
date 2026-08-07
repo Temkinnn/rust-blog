@@ -100,7 +100,7 @@ impl PostRepository {
             "
             Delete from posts
             Where id = $1
-            Returning id, title, slug, content, published, tags, author_id            ",
+            Returning id, title, slug, content, published, tags, author_id",
             post_id
         )
         .fetch_optional(&self.0)

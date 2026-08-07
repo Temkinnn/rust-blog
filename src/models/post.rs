@@ -22,7 +22,6 @@ pub struct CreatePostDto {
     pub content: String,
     pub published: bool,
     pub tags: Vec<String>,
-    pub author_id: Uuid,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
