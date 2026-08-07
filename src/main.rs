@@ -7,7 +7,9 @@ use utoipa_swagger_ui::SwaggerUi;
 use rust_auth::{
     config::{app::AppConfig, jwt::JwtConfig, repositories::Repositories, services::Services},
     docs::SecurityAddon,
-    handlers::{auth::auth_router, user::users_router},
+    handlers::{
+        auth::auth_router, post::posts_router, user::users_router, user_post::users_posts_router,
+    },
 };
 
 #[actix_web::main]
@@ -27,7 +29,9 @@ async fn main() -> std::io::Result<()> {
                 utoipa_actix_web::scope("/api/v1")
                     .app_data(services_data.clone())
                     .configure(auth_router)
-                    .configure(users_router),
+                    .configure(users_router)
+                    .configure(posts_router)
+                    .configure(users_posts_router),
             )
             .split_for_parts();
 

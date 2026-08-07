@@ -41,14 +41,22 @@ impl PostRepository {
         .await
     }
 
-    pub async fn get_posts_by_author_id(&self, author_id: Id) -> DatabaseResult<Vec<Post>> {
+    pub async fn get_posts_by_author_id(
+        &self,
+        author_id: Id,
+        limit: i64,
+        offset: i64,
+    ) -> DatabaseResult<Vec<Post>> {
         sqlx::query_as!(
             Post,
             "
             Select id, title, slug, content, published, tags, author_id from posts
             Where author_id = $1
+            Limit $2 offset $3
             ",
-            author_id
+            author_id,
+            limit,
+            offset
         )
         .fetch_all(&self.0)
         .await

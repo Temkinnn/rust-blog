@@ -152,23 +152,22 @@ async fn delete_user(
 }
 
 pub fn users_router(cfg: &mut ServiceConfig) {
+    // Публичные или только auth routes
     cfg.service(
         scope("/users")
             .wrap(from_fn(auth_middleware))
             .service(me)
-            .wrap(from_fn(auth_middleware))
             .service(get_users)
-            .wrap(from_fn(auth_middleware))
             .service(get_user_by_id)
+    );
+
+    // Admin-only routes (auth + admin)
+    cfg.service(
+        scope("/users")
             .wrap(from_fn(auth_middleware))
+            .wrap(from_fn(admin_middleware))
             .service(create_user)
-            .wrap(from_fn(admin_middleware))
-            .wrap(from_fn(auth_middleware))
             .service(delete_user)
-            .wrap(from_fn(admin_middleware))
-            .wrap(from_fn(auth_middleware))
             .service(update_user)
-            .wrap(from_fn(admin_middleware))
-            .wrap(from_fn(auth_middleware))
     );
 }
