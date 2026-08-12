@@ -1,8 +1,10 @@
+use uuid::Uuid;
+
 use crate::{
     errors::AppError,
     models::post::{CreatePostDto, CreatePostRepoDto, Post, PublicPost, UpdatePostDto},
     repositories::post::PostRepository,
-    types::{AppResult, Id},
+    types::{AppResult},
 };
 
 pub struct PostService(PostRepository);
@@ -16,7 +18,7 @@ impl PostService {
         title.replace(" ", "-") // Simple function to generate slug
     }
 
-    pub async fn create_post(&self, author_id: Id, dto: CreatePostDto) -> AppResult<Post> {
+    pub async fn create_post(&self, author_id: Uuid, dto: CreatePostDto) -> AppResult<Post> {
         let dto = CreatePostRepoDto {
             author_id,
             content: dto.content,
@@ -40,7 +42,7 @@ impl PostService {
 
     pub async fn get_posts_by_author_id(
         &self,
-        author_id: Id,
+        author_id: Uuid,
         limit: Option<i64>,
         offset: Option<i64>,
     ) -> AppResult<Vec<PublicPost>> {
@@ -61,8 +63,8 @@ impl PostService {
 
     pub async fn update_post(
         &self,
-        post_id: Id,
-        author_id: Id,
+        post_id: Uuid,
+        author_id: Uuid,
         dto: UpdatePostDto,
     ) -> AppResult<Post> {
         self.0
@@ -71,7 +73,7 @@ impl PostService {
             .ok_or(AppError::NotFound)
     }
 
-    pub async fn delete_post(&self, post_id: Id) -> AppResult<Post> {
+    pub async fn delete_post(&self, post_id: Uuid) -> AppResult<Post> {
         self.0
             .delete_post_by_id(post_id)
             .await?

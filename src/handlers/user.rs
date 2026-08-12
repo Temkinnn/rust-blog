@@ -12,7 +12,7 @@ use crate::{
         query::LimitOffsetQuery,
         user::{CreateUserDto, UpdateUserDto, User},
     },
-    types::{AppResult, Id},
+    types::AppResult,
 };
 
 #[utoipa::path(
@@ -76,7 +76,7 @@ async fn get_users(
 #[get("/{id}")]
 async fn get_user_by_id(
     services: web::Data<Services>,
-    path: web::Path<Id>,
+    path: web::Path<Uuid>,
 ) -> AppResult<impl Responder> {
     let user = services.user.get_user_by_id(path.into_inner()).await?;
     Ok(HttpResponse::Ok().json(user))
@@ -119,7 +119,7 @@ async fn create_user(
 #[patch("/{id}")]
 async fn update_user(
     services: web::Data<Services>,
-    path: web::Path<Id>,
+    path: web::Path<Uuid>,
     body: web::Json<UpdateUserDto>,
 ) -> AppResult<impl Responder> {
     let user = services
@@ -145,7 +145,7 @@ async fn update_user(
 #[delete("/{id}")]
 async fn delete_user(
     services: web::Data<Services>,
-    path: web::Path<Id>,
+    path: web::Path<Uuid>,
 ) -> AppResult<impl Responder> {
     let user = services.user.delete_user(path.into_inner()).await?;
     Ok(HttpResponse::Created().json(user))
@@ -158,7 +158,7 @@ pub fn users_router(cfg: &mut ServiceConfig) {
             .wrap(from_fn(auth_middleware))
             .service(me)
             .service(get_users)
-            .service(get_user_by_id)
+            .service(get_user_by_id),
     );
 
     // Admin-only routes (auth + admin)
@@ -168,6 +168,6 @@ pub fn users_router(cfg: &mut ServiceConfig) {
             .wrap(from_fn(admin_middleware))
             .service(create_user)
             .service(delete_user)
-            .service(update_user)
+            .service(update_user),
     );
 }

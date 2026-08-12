@@ -1,10 +1,11 @@
+use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
     errors::AppError,
     models::user::{CreateUserDto, Role, UpdateUserDto, User},
     repositories::user::UserRepository,
-    types::{AppResult, Id},
+    types::AppResult,
 };
 
 pub struct UserService(UserRepository);
@@ -23,7 +24,7 @@ impl UserService {
         let offset = offset.unwrap_or(0);
         Ok(self.0.get_users(limit, offset).await?)
     }
-    pub async fn get_user_by_id(&self, id: Id) -> AppResult<User> {
+    pub async fn get_user_by_id(&self, id: Uuid) -> AppResult<User> {
         self.0.get_user_by_id(id).await?.ok_or(AppError::NotFound)
     }
     pub async fn get_user_by_email(&self, email: &String) -> AppResult<User> {
@@ -33,7 +34,7 @@ impl UserService {
             .ok_or(AppError::NotFound)
     }
 
-    pub async fn get_user_role_by_id(&self, id: Id) -> AppResult<Role> {
+    pub async fn get_user_role_by_id(&self, id: Uuid) -> AppResult<Role> {
         let user_role = self
             .0
             .get_user_role_by_id(id)
@@ -43,13 +44,13 @@ impl UserService {
         Ok(role)
     }
 
-    pub async fn update_user(&self, id: Id, data: UpdateUserDto) -> AppResult<User> {
+    pub async fn update_user(&self, id: Uuid, data: UpdateUserDto) -> AppResult<User> {
         self.0
             .update_user_by_id(id, data)
             .await?
             .ok_or(AppError::NotFound)
     }
-    pub async fn delete_user(&self, id: Id) -> AppResult<User> {
+    pub async fn delete_user(&self, id: Uuid) -> AppResult<User> {
         self.0
             .delete_user_by_id(id)
             .await?

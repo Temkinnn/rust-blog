@@ -13,7 +13,7 @@ use crate::{
         post::{CreatePostDto, Post, PublicPost, UpdatePostDto},
         query::LimitOffsetQuery,
     },
-    types::{AppResult, Id},
+    types::AppResult,
 };
 
 #[utoipa::path(
@@ -140,10 +140,13 @@ async fn get_post_by_slug(
 async fn update_post(
     req: HttpRequest,
     services: web::Data<Services>,
-    path: web::Path<Id>,
+    path: web::Path<Uuid>,
     dto: web::Json<UpdatePostDto>,
 ) -> AppResult<impl Responder> {
-    let author_id = *req.extensions().get::<Id>().ok_or(AppError::Unauthorized)?;
+    let author_id = *req
+        .extensions()
+        .get::<Uuid>()
+        .ok_or(AppError::Unauthorized)?;
 
     let post = services
         .posts
@@ -170,7 +173,7 @@ async fn update_post(
 #[delete("/{id}")]
 async fn delete_post(
     services: web::Data<Services>,
-    path: web::Path<Id>,
+    path: web::Path<Uuid>,
 ) -> AppResult<impl Responder> {
     let post = services.posts.delete_post(path.into_inner()).await?;
 

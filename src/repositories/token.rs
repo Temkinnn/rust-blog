@@ -1,8 +1,9 @@
 use redis::AsyncTypedCommands;
+use uuid::Uuid;
 
 use crate::{
     errors::AppError,
-    types::{AppResult, Id, Redis, Token},
+    types::{AppResult, Redis, Token},
 };
 
 pub struct TokenRepository(Redis);
@@ -12,20 +13,20 @@ impl TokenRepository {
         Self(pool)
     }
 
-    pub async fn get_token(&self, jti: Id) -> AppResult<Option<Token>> {
+    pub async fn get_token(&self, jti: Uuid) -> AppResult<Option<Token>> {
         let mut conn = self.0.get_multiplexed_async_connection().await?;
         Ok(conn.get(format!("token:{jti}")).await?)
     }
 
-    pub async fn save_token(&self, jti: Id, token: Token, exp: u64) -> AppResult<()> {
+    pub async fn save_token(&self, jti: Uuid, token: Token, exp: u64) -> AppResult<()> {
         let mut conn = self.0.get_multiplexed_async_connection().await?;
         Ok(conn.set_ex(format!("token:{jti}"), token, exp).await?)
     }
 
     pub async fn update_token(
         &self,
-        jti: Id,
-        new_jti: Id,
+        jti: Uuid,
+        new_jti: Uuid,
         token: Token,
         exp: u64,
     ) -> AppResult<()> {
@@ -39,7 +40,7 @@ impl TokenRepository {
         }
     }
 
-    pub async fn delete_token(&self, jti: Id) -> AppResult<()> {
+    pub async fn delete_token(&self, jti: Uuid) -> AppResult<()> {
         let mut conn = self.0.get_multiplexed_async_connection().await?;
         let num = conn.del(format!("token:{jti}")).await?;
 

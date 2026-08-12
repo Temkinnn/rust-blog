@@ -1,5 +1,7 @@
+use uuid::Uuid;
+
 use crate::models::post::{CreatePostRepoDto, Post, PublicPost, UpdatePostDto};
-use crate::types::{Database, DatabaseResult, Id};
+use crate::types::{Database, DatabaseResult};
 
 pub struct PostRepository(Database);
 
@@ -44,7 +46,7 @@ impl PostRepository {
 
     pub async fn get_posts_by_author_id(
         &self,
-        author_id: Id,
+        author_id: Uuid,
         limit: i64,
         offset: i64,
     ) -> DatabaseResult<Vec<PublicPost>> {
@@ -78,8 +80,8 @@ impl PostRepository {
 
     pub async fn update_post_by_id(
         &self,
-        post_id: Id,
-        author_id: Id,
+        post_id: Uuid,
+        author_id: Uuid,
         dto: UpdatePostDto,
     ) -> DatabaseResult<Option<Post>> {
         sqlx::query_as!(
@@ -106,7 +108,7 @@ impl PostRepository {
         .await
     }
 
-    pub async fn delete_post_by_id(&self, post_id: Id) -> DatabaseResult<Option<Post>> {
+    pub async fn delete_post_by_id(&self, post_id: Uuid) -> DatabaseResult<Option<Post>> {
         sqlx::query_as!(
             Post,
             "

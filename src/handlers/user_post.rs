@@ -1,15 +1,12 @@
-use actix_web::{
-    HttpResponse, Responder, get,
-    middleware::from_fn,
-    web::{self},
-};
+use actix_web::{HttpResponse, Responder, get, middleware::from_fn, web};
 use utoipa_actix_web::{scope, service_config::ServiceConfig};
+use uuid::Uuid;
 
 use crate::{
     config::services::Services,
     middlewares::auth::auth_middleware,
     models::{post::Post, query::LimitOffsetQuery},
-    types::{AppResult, Id},
+    types::AppResult,
 };
 
 #[utoipa::path(
@@ -28,7 +25,7 @@ use crate::{
 #[get("/users/{user_id}/posts/")]
 async fn get_posts_by_author(
     services: web::Data<Services>,
-    path: web::Path<Id>,
+    path: web::Path<Uuid>,
     query: web::Query<LimitOffsetQuery>,
 ) -> AppResult<impl Responder> {
     let posts = services

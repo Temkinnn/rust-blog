@@ -1,18 +1,18 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use uuid::Uuid;
 
-use crate::types::Id;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AccessClaims {
-    pub sub: Id,
+    pub sub: Uuid,
     pub exp: usize,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RefreshClaims {
-    pub sub: Id,
-    pub jti: Id,
+    pub sub: Uuid,
+    pub jti: Uuid,
     pub exp: usize,
 }
 

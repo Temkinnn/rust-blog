@@ -1,6 +1,8 @@
+use uuid::Uuid;
+
 use crate::{
     models::user::{CreateUserDto, Role, UpdateUserDto, User, UserRole},
-    types::{Database, DatabaseResult, Id},
+    types::{Database, DatabaseResult},
 };
 
 pub struct UserRepository(Database);
@@ -42,7 +44,7 @@ impl UserRepository {
         .await
     }
 
-    pub async fn get_user_by_id(&self, id: Id) -> DatabaseResult<Option<User>> {
+    pub async fn get_user_by_id(&self, id: Uuid) -> DatabaseResult<Option<User>> {
         sqlx::query_as!(
             User,
             "
@@ -68,7 +70,7 @@ impl UserRepository {
         .await
     }
 
-    pub async fn get_user_role_by_id(&self, id: Id) -> DatabaseResult<Option<UserRole>> {
+    pub async fn get_user_role_by_id(&self, id: Uuid) -> DatabaseResult<Option<UserRole>> {
         sqlx::query_as!(
             UserRole,
             "
@@ -83,7 +85,7 @@ impl UserRepository {
 
     pub async fn update_user_by_id(
         &self,
-        id: Id,
+        id: Uuid,
         dto: UpdateUserDto,
     ) -> DatabaseResult<Option<User>> {
         sqlx::query_as!(
@@ -108,7 +110,7 @@ impl UserRepository {
         .await
     }
 
-    pub async fn delete_user_by_id(&self, id: Id) -> DatabaseResult<Option<User>> {
+    pub async fn delete_user_by_id(&self, id: Uuid) -> DatabaseResult<Option<User>> {
         sqlx::query_as!(
             User,
             r#"

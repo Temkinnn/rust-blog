@@ -8,7 +8,7 @@ use validator::Validate;
 pub struct Comment {
     pub id: Uuid,
     pub content: String,
-    pub author_id: Uuid,
+    pub author_id: Option<Uuid>,
     pub post_id: Uuid,
     pub updated_at: PrimitiveDateTime,
     pub created_at: PrimitiveDateTime,

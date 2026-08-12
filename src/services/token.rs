@@ -8,7 +8,7 @@ use crate::{
     errors::AppError,
     models::token::{AccessClaims, RefreshClaims, Tokens},
     repositories::token::TokenRepository,
-    types::{AppResult, Id, Token},
+    types::{AppResult, Token},
 };
 
 pub struct TokenService {
@@ -21,7 +21,7 @@ impl TokenService {
         Self { jwt, repo }
     }
 
-    pub fn generate_access_token(&self, id: Id) -> AppResult<String> {
+    pub fn generate_access_token(&self, id: Uuid) -> AppResult<String> {
         let exp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("Failed to get Current Time")
@@ -39,7 +39,7 @@ impl TokenService {
         )?)
     }
 
-    fn generate_refresh_token(&self, id: Id) -> AppResult<String> {
+    fn generate_refresh_token(&self, id: Uuid) -> AppResult<String> {
         let exp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("Failed to get Current Time")
@@ -58,7 +58,7 @@ impl TokenService {
         )?)
     }
 
-    pub fn generate_tokens(&self, id: Id) -> AppResult<Tokens> {
+    pub fn generate_tokens(&self, id: Uuid) -> AppResult<Tokens> {
         let access_token = self.generate_access_token(id)?;
         let refresh_token = self.generate_refresh_token(id)?;
 
@@ -107,11 +107,11 @@ impl TokenService {
         self.repo.save_token(verified_token.jti, token, exp).await
     }
 
-    pub async fn delete_refresh_token(&self, jti: Id) -> AppResult<()> {
+    pub async fn delete_refresh_token(&self, jti: Uuid) -> AppResult<()> {
         self.repo.delete_token(jti).await
     }
 
-    pub async fn update_refresh_token(&self, jti: Id, token: Token) -> AppResult<()> {
+    pub async fn update_refresh_token(&self, jti: Uuid, token: Token) -> AppResult<()> {
         let verified_token = self.verify_refresh_token(&token)?;
 
         let exp = self.jwt.refresh_expiration.as_secs();
