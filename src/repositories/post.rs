@@ -1,4 +1,4 @@
-use crate::models::post::{CreatePostRepoDto, Post, UpdatePostDto};
+use crate::models::post::{CreatePostRepoDto, Post, PublicPost, UpdatePostDto};
 use crate::types::{Database, DatabaseResult, Id};
 
 pub struct PostRepository(Database);
@@ -27,11 +27,12 @@ impl PostRepository {
         .await
     }
 
-    pub async fn get_posts(&self, limit: i64, offset: i64) -> DatabaseResult<Vec<Post>> {
+    pub async fn get_posts(&self, limit: i64, offset: i64) -> DatabaseResult<Vec<PublicPost>> {
         sqlx::query_as!(
-            Post,
+            PublicPost,
             "
-            Select id, title, slug, content, published, tags, author_id from posts
+            Select id, title, slug, content, tags, author_id from posts
+            Where published = true
             Limit $1 Offset $2
             ",
             limit,
@@ -46,12 +47,12 @@ impl PostRepository {
         author_id: Id,
         limit: i64,
         offset: i64,
-    ) -> DatabaseResult<Vec<Post>> {
+    ) -> DatabaseResult<Vec<PublicPost>> {
         sqlx::query_as!(
-            Post,
+            PublicPost,
             "
-            Select id, title, slug, content, published, tags, author_id from posts
-            Where author_id = $1
+            Select id, title, slug, content, tags, author_id from posts
+            Where author_id = $1 AND published = true
             Limit $2 offset $3
             ",
             author_id,
@@ -62,12 +63,12 @@ impl PostRepository {
         .await
     }
 
-    pub async fn get_post_by_slug(&self, slug: String) -> DatabaseResult<Option<Post>> {
+    pub async fn get_post_by_slug(&self, slug: String) -> DatabaseResult<Option<PublicPost>> {
         sqlx::query_as!(
-            Post,
+            PublicPost,
             "
-            Select id, title, slug, content, published, tags, author_id from posts
-            Where slug = $1
+            Select id, title, slug, content, tags, author_id from posts
+            Where slug = $1 AND published = true
             ",
             slug
         )
@@ -78,6 +79,7 @@ impl PostRepository {
     pub async fn update_post_by_id(
         &self,
         post_id: Id,
+        author_id: Id,
         dto: UpdatePostDto,
     ) -> DatabaseResult<Option<Post>> {
         sqlx::query_as!(
@@ -85,14 +87,16 @@ impl PostRepository {
             "
             Update posts
             Set
-                title = Coalesce($2, title),
-                content = Coalesce($3, content),
-                published = Coalesce($4, published),
-                tags = Coalesce($5, tags)
-            Where id = $1
+                title = Coalesce($3, title),
+                content = Coalesce($4, content),
+                published = Coalesce($5, published),
+                tags = Coalesce($6, tags),
+                updated_at = now()
+            Where id = $1 AND author_id = $2
             Returning id, title, slug, content, published, tags, author_id
             ",
             post_id,
+            author_id,
             dto.title,
             dto.content,
             dto.published,

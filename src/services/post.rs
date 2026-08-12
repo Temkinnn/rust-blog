@@ -1,6 +1,6 @@
 use crate::{
     errors::AppError,
-    models::post::{CreatePostDto, CreatePostRepoDto, Post, UpdatePostDto},
+    models::post::{CreatePostDto, CreatePostRepoDto, Post, PublicPost, UpdatePostDto},
     repositories::post::PostRepository,
     types::{AppResult, Id},
 };
@@ -28,7 +28,11 @@ impl PostService {
         Ok(self.0.create_post(dto).await?)
     }
 
-    pub async fn get_posts(&self, limit: Option<i64>, offset: Option<i64>) -> AppResult<Vec<Post>> {
+    pub async fn get_posts(
+        &self,
+        limit: Option<i64>,
+        offset: Option<i64>,
+    ) -> AppResult<Vec<PublicPost>> {
         let limit = limit.unwrap_or(10);
         let offset = offset.unwrap_or(0);
         Ok(self.0.get_posts(limit, offset).await?)
@@ -39,7 +43,7 @@ impl PostService {
         author_id: Id,
         limit: Option<i64>,
         offset: Option<i64>,
-    ) -> AppResult<Vec<Post>> {
+    ) -> AppResult<Vec<PublicPost>> {
         let limit = limit.unwrap_or(10);
         let offset = offset.unwrap_or(0);
         Ok(self
@@ -48,16 +52,21 @@ impl PostService {
             .await?)
     }
 
-    pub async fn get_post_by_slug(&self, slug: String) -> AppResult<Post> {
+    pub async fn get_post_by_slug(&self, slug: String) -> AppResult<PublicPost> {
         self.0
             .get_post_by_slug(slug)
             .await?
             .ok_or(AppError::NotFound)
     }
 
-    pub async fn update_post(&self, author_id: Id, dto: UpdatePostDto) -> AppResult<Post> {
+    pub async fn update_post(
+        &self,
+        post_id: Id,
+        author_id: Id,
+        dto: UpdatePostDto,
+    ) -> AppResult<Post> {
         self.0
-            .update_post_by_id(author_id, dto)
+            .update_post_by_id(post_id, author_id, dto)
             .await?
             .ok_or(AppError::NotFound)
     }

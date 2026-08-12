@@ -14,6 +14,16 @@ pub struct Post {
     pub author_id: Uuid,
 }
 
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct PublicPost {
+    pub id: Uuid,
+    pub title: String,
+    pub slug: String,
+    pub content: String,
+    pub tags: Vec<String>,
+    pub author_id: Uuid,
+}
+
 #[derive(Debug, Serialize, Deserialize, Validate, ToSchema)]
 pub struct CreatePostDto {
     #[validate(length(min = 1, message = "Password must be at least 1 character long"))]

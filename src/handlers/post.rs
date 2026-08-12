@@ -1,5 +1,6 @@
 use actix_web::{
-    HttpRequest, HttpResponse, Responder, delete, get, middleware::from_fn, patch, post, web,
+    HttpMessage, HttpRequest, HttpResponse, Responder, delete, get, middleware::from_fn, patch,
+    post, web,
 };
 use utoipa_actix_web::{scope, service_config::ServiceConfig};
 use uuid::Uuid;
@@ -9,7 +10,7 @@ use crate::{
     errors::AppError,
     middlewares::auth::auth_middleware,
     models::{
-        post::{CreatePostDto, Post, UpdatePostDto},
+        post::{CreatePostDto, Post, PublicPost, UpdatePostDto},
         query::LimitOffsetQuery,
     },
     types::{AppResult, Id},
@@ -25,7 +26,7 @@ use crate::{
         (status = 401),
     )
 )]
-#[post("/{slug}")]
+#[post("/")]
 async fn create_post(
     req: HttpRequest,
     services: web::Data<Services>,
@@ -52,7 +53,7 @@ async fn create_post(
         ("bearer_auth" = [])
     ),
     responses(
-        (status = 200, body = [Post]),
+        (status = 200, body = [PublicPost]),
         (status = 401),
     )
 )]
@@ -72,7 +73,7 @@ async fn get_posts(
         ("bearer_auth" = [])
     ),
     responses(
-        (status = 200, body = [Post]),
+        (status = 200, body = [PublicPost]),
         (status = 401),
     )
 )]
@@ -106,7 +107,7 @@ async fn get_my_posts(
         ("slug" = String, Path, description = "The slug to the post"),
     ),
     responses(
-        (status = 200, body = Post),
+        (status = 200, body = PublicPost),
         (status = 401),
         (status = 404),
     )
@@ -137,13 +138,16 @@ async fn get_post_by_slug(
 )]
 #[patch("/{id}")]
 async fn update_post(
+    req: HttpRequest,
     services: web::Data<Services>,
     path: web::Path<Id>,
     dto: web::Json<UpdatePostDto>,
 ) -> AppResult<impl Responder> {
+    let author_id = *req.extensions().get::<Id>().ok_or(AppError::Unauthorized)?;
+
     let post = services
         .posts
-        .update_post(path.into_inner(), dto.into_inner())
+        .update_post(path.into_inner(), author_id, dto.into_inner())
         .await?;
 
     Ok(HttpResponse::Ok().json(post))
@@ -167,12 +171,8 @@ async fn update_post(
 async fn delete_post(
     services: web::Data<Services>,
     path: web::Path<Id>,
-    dto: web::Json<UpdatePostDto>,
 ) -> AppResult<impl Responder> {
-    let post = services
-        .posts
-        .update_post(path.into_inner(), dto.into_inner())
-        .await?;
+    let post = services.posts.delete_post(path.into_inner()).await?;
 
     Ok(HttpResponse::Ok().json(post))
 }
