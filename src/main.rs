@@ -36,7 +36,6 @@ async fn main() -> std::io::Result<()> {
             .split_for_parts();
 
         SecurityAddon.modify(&mut openapi);
-        // Connect Swagger
         app.service(SwaggerUi::new("/swagger/{_:.*}").url("/api-docs/openapi.json", openapi))
     })
     .bind((config.env.host, config.env.port))?;

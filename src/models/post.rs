@@ -26,7 +26,11 @@ pub struct PublicPost {
 
 #[derive(Debug, Serialize, Deserialize, Validate, ToSchema)]
 pub struct CreatePostDto {
-    #[validate(length(min = 1, message = "Password must be at least 1 character long"))]
+    #[validate(length(
+        min = 1,
+        max = 100,
+        message = "Password must be at least 1 character long"
+    ))]
     pub title: String,
     #[validate(length(min = 1, message = "Password must be at least 1 character long"))]
     pub content: String,
